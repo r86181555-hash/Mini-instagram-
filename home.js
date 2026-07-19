@@ -1,279 +1,123 @@
-// home.js
-import {
-  collection,
-  query,
-  orderBy,
-  onSnapshot,
-  doc,
-  getDoc,
-  updateDoc,
-  arrayUnion,
-  arrayRemove,
-  addDoc
-} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+// ==========================================
+// IMPORT FIREBASE
+// ==========================================
 
-import { auth, db, serverTimestamp } from "./firebase.js";
+import { auth, db } from "./firebase.js";
 
 import {
-  collection,
-  query,
-  orderBy,
-  onSnapshot,
-  doc,
-  updateDoc,
-  arrayUnion,
-  arrayRemove,
-  addDoc
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    setDoc,
+    query,
+    where,
+    orderBy,
+    serverTimestamp,
+    onSnapshot,
+    arrayUnion,
+    arrayRemove
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 import {
-  onAuthStateChanged
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
+
+// ==========================================
+// CLOUDINARY
+// ==========================================
+
+const CLOUD_NAME = "nhy9Ifkt";
+const UPLOAD_PRESET = "rhk_upload";
+
+
+// ==========================================
+// DOM
+// ==========================================
+
 const feed = document.getElementById("feed");
-const stories = document.getElementById("stories");
+const loader = document.getElementById("loader");
+const stories = document.getElementById("storyContainer");
+
+const myProfileImage = document.getElementById("myProfileImage");
+const bottomProfile = document.getElementById("bottomProfile");
+
+const template = document.getElementById("postTemplate");
+
+const uploadPopup = document.getElementById("uploadPopup");
+const createBtn = document.getElementById("createBtn");
+const closeUpload = document.getElementById("closeUpload");
+const uploadPostBtn = document.getElementById("uploadPost");
+
+const postFile = document.getElementById("postFile");
+const previewArea = document.getElementById("previewArea");
+const caption = document.getElementById("caption");
+
+
+// ==========================================
+// VARIABLES
+// ==========================================
 
 let currentUser = null;
+let currentUserData = null;
 
-onAuthStateChanged(auth, user => {
+let selectedFile = null;
+
+
+// ==========================================
+// AUTH
+// ==========================================
+
+onAuthStateChanged(auth, async (user) => {
 
     if (!user) {
+
         location.href = "index.html";
         return;
+
     }
 
     currentUser = user;
 
-    loadFeed();
+    await loadCurrentUser();
+
     loadStories();
+
+    loadPosts();
 
 });
 
-function loadFeed() {
 
-    const q = query(
-        collection(db, "posts"),
-        orderBy("createdAt", "desc")
+// ==========================================
+// LOAD CURRENT USER
+// ==========================================
+
+async function loadCurrentUser() {
+
+    const snap = await getDoc(
+        doc(db, "users", currentUser.uid)
     );
 
-    onSnapshot(q, snapshot => {
+    if (!snap.exists()) return;
 
-        feed.innerHTML = "";
+    currentUserData = snap.data();
 
-        snapshot.forEach(docSnap => {
+    myProfileImage.src =
+        currentUserData.photoURL || "images/default.png";
 
-            const post = docSnap.data();
-
-            const liked =
-                post.likes?.includes(currentUser.uid);
-
-            feed.innerHTML += `
-
-<div class="post">
-
-<div class="post-header">
-
-<div class="post-user">
-
-<img src="${post.userPhoto}">
-
-<div>
-
-<div class="post-username">
-
-${post.username}
-
-</div>
-
-<div class="post-location">
-
-${post.location || ""}
-
-</div>
-
-</div>
-
-</div>
-
-<i class="fa-solid fa-ellipsis"></i>
-
-</div>
-
-<div style="position:relative;">
-
-<img
-class="post-image"
-src="${post.image}">
-
-<i class="fa-solid fa-heart big-heart"></i>
-
-</div>
-
-<div class="post-actions">
-
-<div class="left-actions">
-
-<i
-class="${liked ?
-'fa-solid like' :
-'fa-regular'} fa-heart"
-
-onclick="toggleLike('${docSnap.id}')">
-
-</i>
-
-<i
-class="fa-regular fa-comment">
-
-</i>
-
-<i
-class="fa-regular fa-paper-plane">
-
-</i>
-
-</div>
-
-<i
-class="fa-regular fa-bookmark">
-
-</i>
-
-</div>
-
-<div class="post-likes">
-
-${post.likes?.length || 0} likes
-
-</div>
-
-<div class="post-caption">
-
-<span>${post.username}</span>
-
-${post.caption}
-
-</div>
-
-<div
-class="post-comments"
-
-onclick="openComments('${docSnap.id}')">
-
-View comments
-
-</div>
-
-<div class="post-time">
-
-Just now
-
-</div>
-
-</div>
-
-`;
-
-        });
-
-    });
+    bottomProfile.src =
+        currentUserData.photoURL || "images/default.png";
 
 }
-// ==========================
-// LIKE / UNLIKE
-// ==========================
 
-window.toggleLike = async function (postId) {
 
-    const ref = doc(db, "posts", postId);
-
-    const icon = event.target;
-
-    const liked = icon.classList.contains("fa-solid");
-
-    try {
-
-        if (liked) {
-
-            await updateDoc(ref, {
-                likes: arrayRemove(currentUser.uid)
-            });
-
-        } else {
-
-            await updateDoc(ref, {
-                likes: arrayUnion(currentUser.uid)
-            });
-
-        }
-
-    } catch (err) {
-
-        console.error(err);
-
-    }
-
-};
-
-// ==========================
-// SHARE POST
-// ==========================
-
-window.sharePost = async function (image, caption) {
-
-    if (navigator.share) {
-
-        try {
-
-            await navigator.share({
-
-                title: "RHK",
-
-                text: caption,
-
-                url: image
-
-            });
-
-        } catch (e) {}
-
-    } else {
-
-        navigator.clipboard.writeText(image);
-
-        alert("Post link copied.");
-
-    }
-
-};
-
-// ==========================
-// COMMENTS
-// ==========================
-
-window.openComments = function (postId) {
-
-    const text = prompt("Write a comment");
-
-    if (!text) return;
-
-    addDoc(collection(db, "posts", postId, "comments"), {
-
-        uid: currentUser.uid,
-
-        username: currentUser.displayName,
-
-        comment: text,
-
-        createdAt: serverTimestamp()
-
-    });
-
-};
-
-// ==========================
-// STORIES
-// ==========================
+// ==========================================
+// LOAD STORIES
+// ==========================================
 
 function loadStories() {
 
@@ -282,377 +126,603 @@ function loadStories() {
         orderBy("createdAt", "desc")
     );
 
-    onSnapshot(q, snap => {
+    onSnapshot(q, async (snapshot) => {
 
         stories.innerHTML = "";
 
-        snap.forEach(docSnap => {
+        for (const story of snapshot.docs) {
 
-            const s = docSnap.data();
+            const data = story.data();
 
-            stories.innerHTML += `
+            const userSnap = await getDoc(
+                doc(db, "users", data.uid)
+            );
 
-<div class="story"
-onclick="viewStory('${s.media}')">
+            if (!userSnap.exists()) continue;
 
-<img src="${s.photo}">
+            const user = userSnap.data();
 
-<p>${s.username}</p>
+            const card = document.createElement("div");
+
+            card.className = "story";
+
+            card.innerHTML = `
+            
+<div class="storyImage">
+
+<img src="${user.photoURL || 'images/default.png'}">
 
 </div>
 
+<span>${user.username}</span>
+
 `;
 
-        });
+            card.onclick = () => {
+
+                openStory(data);
+
+            };
+
+            stories.appendChild(card);
+
+        }
+
+        loader.style.display = "none";
 
     });
 
 }
 
-window.viewStory = function (url) {
 
-    const win = window.open("");
+// ==========================================
+// LOAD POSTS
+// ==========================================
 
-    win.document.write(`
+function loadPosts() {
 
-<style>
+    const q = query(
 
-body{
+        collection(db, "posts"),
 
-margin:0;
+        orderBy("createdAt", "desc")
 
-background:#000;
+    );
 
-display:flex;
+    onSnapshot(q, async (snapshot) => {
 
-justify-content:center;
+        feed.innerHTML = "";
 
-align-items:center;
+        for (const post of snapshot.docs) {
 
-height:100vh;
+            await createPost(post);
 
-}
+        }
 
-img,video{
-
-max-width:100%;
-
-max-height:100%;
+    });
 
 }
+// ==========================================
+// CREATE POST
+// ==========================================
 
-</style>
+async function createPost(postDoc) {
 
-${url.endsWith(".mp4")
-? `<video controls autoplay src="${url}"></video>`
-: `<img src="${url}">`}
+    const post = postDoc.data();
 
-`);
+    const userSnap = await getDoc(
+        doc(db, "users", post.uid)
+    );
 
-};
+    if (!userSnap.exists()) return;
 
-// ==========================
-// DOUBLE TAP LIKE
-// ==========================
+    const user = userSnap.data();
 
-document.addEventListener("dblclick", e => {
+    const clone = template.content.cloneNode(true);
 
-    const image = e.target.closest(".post-image");
+    const root = clone.querySelector(".post");
 
-    if (!image) return;
+    const profile = clone.querySelector(".postProfile");
+    const username = clone.querySelector(".postUsername");
+    const location = clone.querySelector(".postLocation");
 
-    const heart =
-        image.parentElement.querySelector(".big-heart");
+    const image = clone.querySelector(".postImage");
+    const video = clone.querySelector(".postVideo");
 
-    heart.classList.add("show");
+    const likes = clone.querySelector(".likeCount");
+    const captionText = clone.querySelector(".captionText");
 
-    setTimeout(() => {
+    const likeBtn = clone.querySelector(".likeBtn");
+    const saveBtn = clone.querySelector(".saveBtn");
+    const commentBtn = clone.querySelector(".commentBtn");
+    const shareBtn = clone.querySelector(".shareBtn");
 
-        heart.classList.remove("show");
+    const commentInput = clone.querySelector(".commentInput");
+    const sendComment = clone.querySelector(".sendComment");
 
-    }, 800);
+    profile.src = user.photoURL || "images/default.png";
 
-});
+    username.textContent = user.username;
 
-// ==========================
-// SIMPLE INFINITE SCROLL
-// ==========================
+    location.textContent = post.location || "";
 
-window.addEventListener("scroll", () => {
+    captionText.innerHTML =
+        `<b>${user.username}</b> ${post.caption || ""}`;
 
-    if (
+    likes.textContent =
+        `${post.likes ? post.likes.length : 0} Likes`;
 
-        window.innerHeight +
-        window.scrollY >=
 
-        document.body.offsetHeight - 300
 
-    ) {
+    // =============================
+    // IMAGE / VIDEO
+    // =============================
 
-        console.log("Load more posts...");
+    if (post.type === "image") {
 
-        // Future pagination
+        image.hidden = false;
+
+        image.src = post.media;
+
+    } else {
+
+        video.hidden = false;
+
+        video.src = post.media;
 
     }
 
-});
-// ==========================================
-// SAVE / UNSAVE POSTS
-// ==========================================
 
-window.toggleSave = async function(postId){
 
-    const ref = doc(db,"posts",postId);
+    // =============================
+    // LIKE BUTTON
+    // =============================
 
-    const snap = await getDoc(ref);
+    if (post.likes &&
+        post.likes.includes(currentUser.uid)) {
 
-    if(!snap.exists()) return;
+        likeBtn.classList.add("liked");
 
-    const post = snap.data();
+        likeBtn.innerHTML =
+            `<i class="fa-solid fa-heart"></i>`;
 
-    const saved = post.savedBy?.includes(currentUser.uid);
+    }
 
-    try{
+    likeBtn.onclick = async () => {
 
-        if(saved){
+        const ref = doc(db, "posts", postDoc.id);
 
-            await updateDoc(ref,{
-                savedBy:arrayRemove(currentUser.uid)
+        if (likeBtn.classList.contains("liked")) {
+
+            likeBtn.classList.remove("liked");
+
+            likeBtn.innerHTML =
+                `<i class="fa-regular fa-heart"></i>`;
+
+            await updateDoc(ref, {
+
+                likes: arrayRemove(currentUser.uid)
+
             });
 
-        }else{
+        } else {
 
-            await updateDoc(ref,{
-                savedBy:arrayUnion(currentUser.uid)
+            likeBtn.classList.add("liked");
+
+            likeBtn.innerHTML =
+                `<i class="fa-solid fa-heart"></i>`;
+
+            await updateDoc(ref, {
+
+                likes: arrayUnion(currentUser.uid)
+
             });
 
         }
 
-    }catch(err){
+    };
 
-        console.error(err);
+
+
+    // =============================
+    // SAVE BUTTON
+    // =============================
+
+    saveBtn.onclick = () => {
+
+        saveBtn.classList.toggle("saved");
+
+        if (saveBtn.classList.contains("saved")) {
+
+            saveBtn.innerHTML =
+                `<i class="fa-solid fa-bookmark"></i>`;
+
+        } else {
+
+            saveBtn.innerHTML =
+                `<i class="fa-regular fa-bookmark"></i>`;
+
+        }
+
+    };
+
+
+
+    // =============================
+    // SHARE BUTTON
+    // =============================
+
+    shareBtn.onclick = async () => {
+
+        if (navigator.share) {
+
+            navigator.share({
+
+                title: "Instagram",
+
+                text: post.caption,
+
+                url: location.href
+
+            });
+
+        } else {
+
+            navigator.clipboard.writeText(location.href);
+
+            showToast("Link copied");
+
+        }
+
+    };
+
+
+
+    // =============================
+    // COMMENT BUTTON
+    // =============================
+
+    commentBtn.onclick = () => {
+
+        commentInput.focus();
+
+    };
+
+
+
+    // =============================
+    // SEND COMMENT
+    // =============================
+
+    sendComment.onclick = async () => {
+
+        const text = commentInput.value.trim();
+
+        if (!text) return;
+
+        await addDoc(
+
+            collection(db,
+            "posts",
+            postDoc.id,
+            "comments"),
+
+            {
+
+                uid: currentUser.uid,
+
+                text,
+
+                createdAt: serverTimestamp()
+
+            }
+
+        );
+
+        commentInput.value = "";
+
+        showToast("Comment Added");
+
+    };
+
+
+
+    // =============================
+    // DOUBLE TAP LIKE
+    // =============================
+
+    let lastTap = 0;
+
+    root.querySelector(".postMedia")
+        .addEventListener("click", async () => {
+
+            const now = Date.now();
+
+            if (now - lastTap < 300) {
+
+                await updateDoc(
+                    doc(db, "posts", postDoc.id),
+                    {
+                        likes: arrayUnion(currentUser.uid)
+                    }
+                );
+
+            }
+
+            lastTap = now;
+
+        });
+
+    feed.appendChild(clone);
+
+}
+// ==========================================
+// CREATE POST POPUP
+// ==========================================
+
+createBtn.onclick = () => {
+    uploadPopup.classList.add("show");
+};
+
+closeUpload.onclick = () => {
+    uploadPopup.classList.remove("show");
+    previewArea.innerHTML = "";
+    postFile.value = "";
+    caption.value = "";
+    selectedFile = null;
+};
+
+uploadPopup.onclick = (e) => {
+    if (e.target === uploadPopup) {
+        closeUpload.click();
+    }
+};
+
+
+// ==========================================
+// FILE PREVIEW
+// ==========================================
+
+postFile.onchange = () => {
+
+    selectedFile = postFile.files[0];
+
+    if (!selectedFile) return;
+
+    previewArea.innerHTML = "";
+
+    if (selectedFile.type.startsWith("image")) {
+
+        const img = document.createElement("img");
+
+        img.src = URL.createObjectURL(selectedFile);
+
+        previewArea.appendChild(img);
+
+    } else {
+
+        const video = document.createElement("video");
+
+        video.controls = true;
+
+        video.src = URL.createObjectURL(selectedFile);
+
+        previewArea.appendChild(video);
 
     }
 
 };
 
-// ==========================================
-// FOLLOW / UNFOLLOW
-// ==========================================
-
-window.toggleFollow = async function(targetUid){
-
-    if(targetUid===currentUser.uid) return;
-
-    const myRef = doc(db,"users",currentUser.uid);
-
-    const targetRef = doc(db,"users",targetUid);
-
-    const mySnap = await getDoc(myRef);
-
-    const following =
-        mySnap.data().following || [];
-
-    if(following.includes(targetUid)){
-
-        await updateDoc(myRef,{
-            following:arrayRemove(targetUid)
-        });
-
-        await updateDoc(targetRef,{
-            followers:arrayRemove(currentUser.uid)
-        });
-
-    }else{
-
-        await updateDoc(myRef,{
-            following:arrayUnion(targetUid)
-        });
-
-        await updateDoc(targetRef,{
-            followers:arrayUnion(currentUser.uid)
-        });
-
-        await addDoc(collection(db,"notifications"),{
-
-            type:"follow",
-
-            from:currentUser.uid,
-
-            to:targetUid,
-
-            createdAt:serverTimestamp(),
-
-            seen:false
-
-        });
-
-    }
-
-};
 
 // ==========================================
-// NOTIFICATIONS
+// CLOUDINARY UPLOAD
 // ==========================================
 
-async function sendNotification(type,to,postId=""){
+async function uploadToCloudinary(file) {
 
-    if(!to) return;
+    const formData = new FormData();
 
-    await addDoc(collection(db,"notifications"),{
+    formData.append("file", file);
 
-        type,
+    formData.append(
+        "upload_preset",
+        UPLOAD_PRESET
+    );
 
-        from:currentUser.uid,
+    const response = await fetch(
 
-        to,
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`,
 
-        postId,
+        {
+            method: "POST",
+            body: formData
+        }
 
-        seen:false,
+    );
 
-        createdAt:serverTimestamp()
-
-    });
+    return await response.json();
 
 }
 
+
 // ==========================================
-// RELATIVE TIME
+// SHARE POST
 // ==========================================
 
-window.timeAgo = function(date){
+uploadPostBtn.onclick = async () => {
 
-    if(!date) return "";
+    if (!selectedFile) {
 
-    const seconds =
-        Math.floor(
-            (Date.now()-date.toDate())/1000
+        showToast("Select image or video");
+
+        return;
+
+    }
+
+    uploadPostBtn.disabled = true;
+
+    uploadPostBtn.innerText = "Uploading...";
+
+    try {
+
+        const result =
+            await uploadToCloudinary(selectedFile);
+
+        await addDoc(
+
+            collection(db, "posts"),
+
+            {
+
+                uid: currentUser.uid,
+
+                media: result.secure_url,
+
+                type: selectedFile.type.startsWith("image")
+                    ? "image"
+                    : "video",
+
+                caption: caption.value,
+
+                likes: [],
+
+                createdAt: serverTimestamp()
+
+            }
+
         );
 
-    if(seconds<60) return "Just now";
+        showToast("Post Uploaded");
 
-    if(seconds<3600)
-        return Math.floor(seconds/60)+"m";
+        closeUpload.click();
 
-    if(seconds<86400)
-        return Math.floor(seconds/3600)+"h";
+    } catch (e) {
 
-    if(seconds<604800)
-        return Math.floor(seconds/86400)+"d";
+        console.log(e);
 
-    return Math.floor(seconds/604800)+"w";
-
-};
-
-// ==========================================
-// MEDIA TEMPLATE
-// ==========================================
-
-window.renderMedia = function(post){
-
-    if(post.video){
-
-        return `
-        <video
-        class="post-image"
-        controls
-        playsinline
-        preload="metadata">
-
-            <source
-            src="${post.video}"
-            type="video/mp4">
-
-        </video>
-        `;
+        showToast("Upload Failed");
 
     }
 
-    if(post.images && post.images.length){
+    uploadPostBtn.disabled = false;
 
-        return `
+    uploadPostBtn.innerText = "Share";
 
-        <div class="carousel">
+};
 
-        ${post.images.map(img=>`
 
-        <img
-        class="post-image"
-        src="${img}">
+// ==========================================
+// STORY VIEWER
+// ==========================================
 
-        `).join("")}
+const storyViewer =
+document.getElementById("storyViewer");
 
-        </div>
+const storyImage =
+document.getElementById("storyImage");
 
-        `;
+const storyVideo =
+document.getElementById("storyVideo");
+
+const storyUserImage =
+document.getElementById("storyUserImage");
+
+const storyUserName =
+document.getElementById("storyUserName");
+
+const closeStory =
+document.getElementById("closeStory");
+
+function openStory(story){
+
+    storyViewer.classList.add("show");
+
+    storyUserImage.src =
+        story.profile || "images/default.png";
+
+    storyUserName.innerText =
+        story.username || "";
+
+    if(story.type==="image"){
+
+        storyImage.hidden=false;
+
+        storyVideo.hidden=true;
+
+        storyImage.src=story.media;
+
+    }else{
+
+        storyVideo.hidden=false;
+
+        storyImage.hidden=true;
+
+        storyVideo.src=story.media;
 
     }
 
-    return `
+}
 
-    <img
-    class="post-image"
-    src="${post.image}">
+closeStory.onclick=()=>{
 
-    `;
+    storyViewer.classList.remove("show");
 
-};
-
-// ==========================================
-// LOADING SKELETON
-// ==========================================
-
-window.showSkeleton = function(){
-
-feed.innerHTML=`
-
-<div class="card">
-
-<div class="skeleton skeleton-avatar"></div>
-
-<div class="skeleton skeleton-text"></div>
-
-<div class="skeleton skeleton-image"></div>
-
-</div>
-
-<div class="card">
-
-<div class="skeleton skeleton-avatar"></div>
-
-<div class="skeleton skeleton-text"></div>
-
-<div class="skeleton skeleton-image"></div>
-
-</div>
-
-`;
+    storyVideo.pause();
 
 };
 
-// ==========================================
-// GLOBAL ERROR LOGGER
-// ==========================================
-
-window.addEventListener("error",e=>{
-
-console.error("App Error:",e.message);
-
-});
 
 // ==========================================
-// CONNECTION STATUS
+// TOAST
 // ==========================================
 
-window.addEventListener("offline",()=>{
+function showToast(text){
 
-alert("You are offline.");
+    const toast=document.getElementById("toast");
 
-});
+    toast.innerText=text;
 
-window.addEventListener("online",()=>{
+    toast.classList.add("show");
 
-console.log("Connection restored.");
+    setTimeout(()=>{
 
-});
+        toast.classList.remove("show");
+
+    },2500);
+
+}
+
+
+// ==========================================
+// NAVIGATION
+// ==========================================
+
+document.getElementById("homeNav").onclick=()=>{
+
+    location.href="home.html";
+
+};
+
+document.getElementById("searchNav").onclick=()=>{
+
+    location.href="search.html";
+
+};
+
+document.getElementById("reelsNav").onclick=()=>{
+
+    location.href="reels.html";
+
+};
+
+document.getElementById("activityNav").onclick=()=>{
+
+    location.href="notifications.html";
+
+};
+
+document.getElementById("profileNav").onclick=()=>{
+
+    location.href="profile.html";
+
+};
