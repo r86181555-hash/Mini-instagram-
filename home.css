@@ -1,0 +1,630 @@
+/* ===========================
+   RESET
+=========================== */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+-webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+width:100%;
+height:100%;
+font-family:'Poppins',sans-serif;
+background:#ffffff;
+color:#000;
+overflow-x:hidden;
+}
+
+body{
+padding-bottom:75px;
+}
+
+/* ===========================
+   TOP BAR
+=========================== */
+
+.topBar{
+position:fixed;
+top:0;
+left:0;
+right:0;
+height:58px;
+background:#fff;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:0 16px;
+border-bottom:1px solid #efefef;
+z-index:1000;
+}
+
+.logo{
+display:flex;
+align-items:center;
+gap:6px;
+}
+
+.logo h1{
+font-family:'Grand Hotel',cursive;
+font-size:38px;
+font-weight:400;
+}
+
+.logo i{
+font-size:15px;
+margin-top:6px;
+}
+
+.topIcons{
+display:flex;
+align-items:center;
+gap:18px;
+}
+
+.topIcons button{
+background:none;
+border:none;
+cursor:pointer;
+font-size:28px;
+color:#000;
+}
+
+/* ===========================
+   STORIES
+=========================== */
+
+.storySection{
+margin-top:58px;
+width:100%;
+background:#fff;
+border-bottom:1px solid #efefef;
+overflow:hidden;
+}
+
+.stories{
+display:flex;
+align-items:flex-start;
+gap:15px;
+overflow-x:auto;
+padding:12px 10px;
+scrollbar-width:none;
+}
+
+.stories::-webkit-scrollbar{
+display:none;
+}
+
+.story{
+width:74px;
+display:flex;
+flex-direction:column;
+align-items:center;
+cursor:pointer;
+flex-shrink:0;
+}
+
+.storyImage{
+position:relative;
+width:72px;
+height:72px;
+border-radius:50%;
+padding:3px;
+background:linear-gradient(
+45deg,
+#f9ce34,
+#ee2a7b,
+#6228d7
+);
+}
+
+.storyImage img{
+width:100%;
+height:100%;
+border-radius:50%;
+border:3px solid #fff;
+object-fit:cover;
+background:#ddd;
+}
+
+.story span{
+margin-top:6px;
+font-size:12px;
+max-width:70px;
+text-align:center;
+overflow:hidden;
+white-space:nowrap;
+text-overflow:ellipsis;
+}
+
+.myStory .storyImage{
+background:#ddd;
+}
+
+.storyAdd{
+position:absolute;
+bottom:0;
+right:0;
+width:22px;
+height:22px;
+border-radius:50%;
+background:#0095f6;
+display:flex;
+justify-content:center;
+align-items:center;
+border:2px solid #fff;
+color:#fff;
+font-size:12px;
+}
+
+/* ===========================
+   FEED
+=========================== */
+
+#feed{
+width:100%;
+display:flex;
+flex-direction:column;
+padding-bottom:90px;
+}
+
+.post{
+background:#fff;
+margin-bottom:18px;
+}
+
+.postHeader{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:12px;
+}
+
+.postLeft{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.postProfile{
+width:38px;
+height:38px;
+border-radius:50%;
+object-fit:cover;
+background:#ddd;
+}
+
+.postUsername{
+font-size:14px;
+font-weight:600;
+}
+
+.postLocation{
+font-size:11px;
+color:#777;
+}
+
+.moreBtn{
+background:none;
+border:none;
+font-size:20px;
+cursor:pointer;
+}
+
+.postMedia{
+width:100%;
+background:#000;
+}
+
+.postImage,
+.postVideo{
+width:100%;
+display:block;
+max-height:650px;
+object-fit:cover;
+background:#000;
+}
+/* ===========================
+   POST ACTIONS
+=========================== */
+
+.postActions{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:10px 12px;
+}
+
+.leftActions{
+display:flex;
+align-items:center;
+gap:18px;
+}
+
+.postActions button{
+background:none;
+border:none;
+cursor:pointer;
+font-size:26px;
+color:#111;
+transition:.2s;
+}
+
+.postActions button:active{
+transform:scale(.9);
+}
+
+.likeBtn.liked i{
+color:#ed4956;
+font-weight:900;
+}
+
+.saveBtn.saved i{
+font-weight:900;
+}
+
+/* ===========================
+   POST INFO
+=========================== */
+
+.postInfo{
+padding:0 12px 14px;
+}
+
+.likeCount{
+font-size:14px;
+margin-bottom:8px;
+font-weight:600;
+}
+
+.captionText{
+font-size:14px;
+line-height:1.5;
+word-break:break-word;
+margin-bottom:8px;
+}
+
+.captionText b{
+margin-right:6px;
+}
+
+.viewComments{
+background:none;
+border:none;
+color:#737373;
+font-size:14px;
+cursor:pointer;
+padding:4px 0;
+}
+
+.commentBox{
+display:flex;
+align-items:center;
+margin-top:10px;
+border-top:1px solid #efefef;
+padding-top:10px;
+}
+
+.commentInput{
+flex:1;
+border:none;
+outline:none;
+font-size:14px;
+background:transparent;
+}
+
+.sendComment{
+background:none;
+border:none;
+color:#0095f6;
+font-weight:600;
+cursor:pointer;
+padding-left:10px;
+}
+
+/* ===========================
+   CREATE POST POPUP
+=========================== */
+
+.uploadPopup{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.65);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:5000;
+}
+
+.uploadPopup.show{
+display:flex;
+}
+
+.uploadCard{
+width:95%;
+max-width:430px;
+background:#fff;
+border-radius:18px;
+overflow:hidden;
+animation:popup .25s ease;
+}
+
+@keyframes popup{
+from{
+transform:scale(.9);
+opacity:0;
+}
+to{
+transform:scale(1);
+opacity:1;
+}
+}
+
+.uploadHeader{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:16px;
+border-bottom:1px solid #eee;
+}
+
+.uploadHeader h2{
+font-size:18px;
+}
+
+.uploadHeader button{
+background:none;
+border:none;
+font-size:24px;
+cursor:pointer;
+}
+
+.uploadBody{
+padding:18px;
+}
+
+.uploadBox{
+height:220px;
+border:2px dashed #ccc;
+border-radius:14px;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+cursor:pointer;
+text-align:center;
+}
+
+.uploadBox i{
+font-size:55px;
+margin-bottom:12px;
+}
+
+.uploadBox h3{
+margin-bottom:6px;
+}
+
+#previewArea{
+margin-top:15px;
+}
+
+#previewArea img,
+#previewArea video{
+width:100%;
+border-radius:12px;
+max-height:350px;
+object-fit:cover;
+}
+
+#caption{
+margin-top:15px;
+width:100%;
+height:100px;
+resize:none;
+padding:12px;
+border:1px solid #ddd;
+border-radius:12px;
+outline:none;
+font-size:14px;
+}
+
+#uploadPost{
+margin-top:15px;
+width:100%;
+height:48px;
+border:none;
+background:#0095f6;
+color:#fff;
+font-size:16px;
+font-weight:600;
+border-radius:12px;
+cursor:pointer;
+}
+
+/* ===========================
+   STORY VIEWER
+=========================== */
+
+#storyViewer{
+position:fixed;
+inset:0;
+background:#000;
+display:none;
+flex-direction:column;
+z-index:7000;
+}
+
+#storyViewer.show{
+display:flex;
+}
+
+.storyViewerTop{
+padding:18px;
+color:#fff;
+}
+
+.storyProgress{
+height:3px;
+background:rgba(255,255,255,.25);
+border-radius:30px;
+overflow:hidden;
+margin-bottom:14px;
+}
+
+#storyProgressBar{
+height:100%;
+width:0%;
+background:#fff;
+}
+
+.storyUser{
+display:flex;
+align-items:center;
+gap:12px;
+}
+
+.storyUser img{
+width:42px;
+height:42px;
+border-radius:50%;
+object-fit:cover;
+}
+
+#closeStory{
+margin-left:auto;
+background:none;
+border:none;
+color:#fff;
+font-size:26px;
+cursor:pointer;
+}
+
+.storyContent{
+flex:1;
+display:flex;
+justify-content:center;
+align-items:center;
+overflow:hidden;
+}
+
+.storyContent img,
+.storyContent video{
+width:100%;
+height:100%;
+object-fit:contain;
+}
+
+/* ===========================
+   BOTTOM NAVIGATION
+=========================== */
+
+.bottomNav{
+position:fixed;
+left:0;
+right:0;
+bottom:0;
+height:60px;
+background:#fff;
+border-top:1px solid #eee;
+display:flex;
+justify-content:space-around;
+align-items:center;
+z-index:3000;
+}
+
+.bottomNav button{
+background:none;
+border:none;
+font-size:25px;
+cursor:pointer;
+color:#111;
+}
+
+.bottomNav button.active{
+font-weight:bold;
+}
+
+#bottomProfile{
+width:28px;
+height:28px;
+border-radius:50%;
+object-fit:cover;
+border:2px solid #111;
+}
+
+/* ===========================
+   LOADER
+=========================== */
+
+#loader{
+position:fixed;
+inset:0;
+background:#fff;
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:9000;
+}
+
+.loaderCircle{
+width:45px;
+height:45px;
+border:4px solid #ddd;
+border-top:4px solid #0095f6;
+border-radius:50%;
+animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+100%{
+transform:rotate(360deg);
+}
+}
+
+/* ===========================
+   TOAST
+=========================== */
+
+#toast{
+position:fixed;
+left:50%;
+bottom:80px;
+transform:translateX(-50%);
+background:#111;
+color:#fff;
+padding:12px 20px;
+border-radius:25px;
+font-size:14px;
+opacity:0;
+pointer-events:none;
+transition:.3s;
+z-index:9999;
+}
+
+#toast.show{
+opacity:1;
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media (min-width:768px){
+
+.post{
+max-width:600px;
+margin:0 auto 20px;
+}
+
+.storySection{
+display:flex;
+justify-content:center;
+}
+
+.stories{
+max-width:650px;
+}
+
+   }
