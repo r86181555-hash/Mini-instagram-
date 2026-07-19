@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Instagram</title>
+
+<link rel="stylesheet" href="home.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+</head>
+
+<body>
+
+<!-- ========================= -->
+<!-- TOP NAVBAR -->
+<!-- ========================= -->
+
+<header class="topBar">
+
+<div class="logo">
+
+<h1>Instagram</h1>
+
+<i class="fa-solid fa-angle-down"></i>
+
+</div>
+
+<div class="topIcons">
+
+<button id="createBtn">
+
+<i class="fa-solid fa-square-plus"></i>
+
+</button>
+
+<button id="heartBtn">
+
+<i class="fa-regular fa-heart"></i>
+
+</button>
+
+<button id="messageBtn">
+
+<i class="fa-regular fa-paper-plane"></i>
+
+</button>
+
+</div>
+
+</header>
+
+<!-- ========================= -->
+<!-- STORIES -->
+<!-- ========================= -->
+
+<section class="storySection">
+
+<div class="stories" id="stories">
+
+<!-- YOUR STORY -->
+
+<div class="story myStory" id="myStory">
+
+<div class="storyImage">
+
+<img
+id="myProfileImage"
+src="images/default.png">
+
+<div class="storyAdd">
+
+<i class="fa-solid fa-plus"></i>
+
+</div>
+
+</div>
+
+<span>Your Story</span>
+
+</div>
+
+<!-- FIRESTORE STORIES -->
+
+<div id="storyContainer"></div>
+
+</div>
+
+</section>
+
+<!-- ========================= -->
+<!-- POSTS -->
+<!-- ========================= -->
+
+<main id="feed">
+
+<!-- Firestore Posts -->
+
+</main>
+
+<!-- ========================= -->
+<!-- CREATE POST -->
+<!-- ========================= -->
+
+<div class="uploadPopup" id="uploadPopup">
+
+<div class="uploadCard">
+
+<div class="uploadHeader">
+
+<h2>Create Post</h2>
+
+<button id="closeUpload">
+
+<i class="fa-solid fa-xmark"></i>
+
+</button>
+
+</div>
+
+<div class="uploadBody">
+
+<label class="uploadBox">
+
+<input
+type="file"
+id="postFile"
+accept="image/*,video/*"
+hidden>
+
+<i class="fa-solid fa-photo-film"></i>
+
+<h3>Select Photo or Video</h3>
+
+<p>Upload from your device</p>
+
+</label>
+
+<div id="previewArea"></div>
+
+<textarea
+
+id="caption"
+
+placeholder="Write a caption...">
+
+</textarea>
+
+<button id="uploadPost">
+
+Share
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ========================= -->
+<!-- STORY VIEWER -->
+<!-- ========================= -->
+
+<div id="storyViewer">
+
+<div class="storyViewerTop">
+
+<div class="storyProgress">
+
+<div id="storyProgressBar"></div>
+
+</div>
+
+<div class="storyUser">
+
+<img id="storyUserImage">
+
+<div>
+
+<h3 id="storyUserName"></h3>
+
+<p id="storyTime"></p>
+
+</div>
+
+</div>
+
+<button id="closeStory">
+
+<i class="fa-solid fa-xmark"></i>
+
+</button>
+
+</div>
+
+<div class="storyContent">
+
+<img id="storyImage">
+
+<video
+id="storyVideo"
+controls
+playsinline>
+
+</video>
+
+</div>
+
+</div>
+<!-- ========================= -->
+<!-- POST TEMPLATE -->
+<!-- ========================= -->
+
+<template id="postTemplate">
+
+<div class="post">
+
+<!-- POST HEADER -->
+
+<div class="postHeader">
+
+<div class="postLeft">
+
+<img
+class="postProfile"
+src="">
+
+<div>
+
+<h3 class="postUsername"></h3>
+
+<p class="postLocation"></p>
+
+</div>
+
+</div>
+
+<button class="moreBtn">
+
+<i class="fa-solid fa-ellipsis"></i>
+
+</button>
+
+</div>
+
+<!-- POST MEDIA -->
+
+<div class="postMedia">
+
+<img
+class="postImage"
+loading="lazy"
+hidden>
+
+<video
+class="postVideo"
+controls
+playsinline
+hidden>
+
+</video>
+
+</div>
+
+<!-- POST ACTIONS -->
+
+<div class="postActions">
+
+<div class="leftActions">
+
+<button class="likeBtn">
+
+<i class="fa-regular fa-heart"></i>
+
+</button>
+
+<button class="commentBtn">
+
+<i class="fa-regular fa-comment"></i>
+
+</button>
+
+<button class="shareBtn">
+
+<i class="fa-regular fa-paper-plane"></i>
+
+</button>
+
+</div>
+
+<button class="saveBtn">
+
+<i class="fa-regular fa-bookmark"></i>
+
+</button>
+
+</div>
+
+<!-- POST DETAILS -->
+
+<div class="postInfo">
+
+<h4 class="likeCount">
+0 Likes
+</h4>
+
+<p class="captionText"></p>
+
+<button class="viewComments">
+
+View all comments
+
+</button>
+
+<div class="commentBox">
+
+<input
+type="text"
+class="commentInput"
+placeholder="Add a comment...">
+
+<button class="sendComment">
+
+Post
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</template>
+
+<!-- ========================= -->
+<!-- LOADER -->
+<!-- ========================= -->
+
+<div id="loader">
+
+<div class="loaderCircle"></div>
+
+</div>
+
+<!-- ========================= -->
+<!-- BOTTOM NAVIGATION -->
+<!-- ========================= -->
+
+<nav class="bottomNav">
+
+<button id="homeNav" class="active">
+
+<i class="fa-solid fa-house"></i>
+
+</button>
+
+<button id="searchNav">
+
+<i class="fa-solid fa-magnifying-glass"></i>
+
+</button>
+
+<button id="reelsNav">
+
+<i class="fa-solid fa-clapperboard"></i>
+
+</button>
+
+<button id="activityNav">
+
+<i class="fa-regular fa-heart"></i>
+
+</button>
+
+<button id="profileNav">
+
+<img
+id="bottomProfile"
+src="images/default.png">
+
+</button>
+
+</nav>
+
+<!-- ========================= -->
+<!-- TOAST -->
+<!-- ========================= -->
+
+<div id="toast"></div>
+
+<!-- ========================= -->
+<!-- JAVASCRIPT -->
+<!-- ========================= -->
+
+<script type="module" src="home.js"></script>
+
+</body>
+</html>
